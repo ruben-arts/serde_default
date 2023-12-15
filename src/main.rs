@@ -1,9 +1,9 @@
 use serde::{Deserialize, Deserializer};
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Deserialize)]
 struct Foos {
     foo: String,
 }
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Deserialize)]
 struct Test {
     #[serde(deserialize_with = "deserialize_foos")]
     pub foo: Option<Foos>,
@@ -24,12 +24,21 @@ where
 }
 
 fn main() {
-    let contents = format!(
+    let succeeding_contents = format!(
         r#"
+        foo = "foo"
         bar = "test"
         "#
     );
+    let _ = toml_edit::de::from_str::<Test>(&succeeding_contents)
+        .expect("parsing should as foo is optional succeed!");
 
-    let _ = toml_edit::de::from_str::<Test>(&contents)
+    let unsucceeding_contents = format!(
+        r#"
+    bar = "test"
+    "#
+    );
+
+    let _ = toml_edit::de::from_str::<Test>(&unsucceeding_contents)
         .expect("parsing should as foo is optional succeed!");
 }
